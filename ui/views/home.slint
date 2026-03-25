@@ -5,7 +5,7 @@ export component HomeView {
     in-out property <MenuState> menu_state;
 
     VerticalLayout {
-        spacing: 16px;
+        spacing: 32px;
 
         Text {
             horizontal-alignment: center;
@@ -29,11 +29,6 @@ export component HomeView {
 
                 clicked => { menu_state = MenuState.Host };
             }
-        }
-
-        Text {
-            horizontal-alignment: center;
-            text: "Made by iwantpizza";
         }
     }
 }
