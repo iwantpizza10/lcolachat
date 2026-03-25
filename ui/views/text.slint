@@ -1,0 +1,26 @@
+import { MenuState } from "../types.slint";
+import { Button } from "std-widgets.slint";
+
+export component TextView {
+    in-out property <MenuState> menu_state;
+    in property <string> message;
+    in property <bool> back_to;
+    in property <MenuState> back_to_state: MenuState.Home;
+
+    VerticalLayout {
+        spacing: 16px;
+
+        Text {
+            horizontal-alignment: center;
+            text: message;
+            font-size: 36px;
+            color: white;
+        }
+
+        if back_to: Button {
+            text: "Back";
+
+            clicked => { menu_state = back_to_state };
+        }
+    }
+}

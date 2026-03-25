@@ -1,3 +1,76 @@
+import { MenuState, UIMessage } from "./types.slint";
+import { HomeView } from "./views/home.slint";
+import { ConnectView } from "views/connect.slint";
+import { HostView } from "views/host.slint";
+import { TextView } from "views/text.slint";
+
 export component LcolachatWindow inherits Window {
-    
+    in-out property <MenuState> menu_state: MenuState.Home;
+    in property <string> chat_name;
+    in property <[UIMessage]> name;
+    callback send-message(content: string);
+    callback host(room: string, user: string);
+    callback connect(ip: string, user: string);
+
+    preferred-height: 512px;
+    preferred-width: 512px;
+    background: #04080c;
+
+    states [
+        title when menu_state == MenuState.Home: {
+            title: "Lcolachat!";
+        }
+
+        connect when menu_state == MenuState.Connect: {
+            title: "Connect - Lcolachat!";
+        }
+
+        host when menu_state == MenuState.Host: {
+            title: "Host - Lcolachat!";
+        }
+
+        messages when menu_state == MenuState.Messages: {
+            title: "\{chat_name} - Lcolachat!";
+        }
+
+        loading when menu_state == MenuState.Loading: {
+            title: "Loading - Lcolachat!";
+        }
+
+        error when menu_state == MenuState.Error: {
+            title: "Error - Lcolachat!";
+        }
+    ]
+
+    if menu_state == MenuState.Home: HomeView {
+        menu_state <=> menu_state;
+    }
+
+    if menu_state == MenuState.Connect: ConnectView {
+        menu_state <=> menu_state;
+
+        connect(ip, user) => { connect(ip, user) }
+    }
+
+    if menu_state == MenuState.Host: HostView {
+        menu_state <=> menu_state;
+
+        host(room, user) => { host(room, user) }
+    }
+
+    if menu_state == MenuState.Messages: Text {
+        text: "plaaaacehooolddeerr";
+    }
+
+    if menu_state == MenuState.Loading: TextView {
+        menu_state <=> menu_state;
+        message: "Loading...";
+    }
+
+    if menu_state == MenuState.Error: TextView {
+        menu_state <=> menu_state;
+        message: "An error\noccurred!";
+        back_to: true;
+        back_to_state: MenuState.Home;
+    }
 }

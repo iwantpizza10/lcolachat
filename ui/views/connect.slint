@@ -1,0 +1,62 @@
+import { MenuState, UIMessage } from "../types.slint";
+import { Button, LineEdit } from "std-widgets.slint";
+
+export component ConnectView {
+    in-out property <MenuState> menu_state;
+    property <string> user;
+    property <string> ip;
+    callback connect(ip: string, user: string);
+
+    function connect_local() {
+        menu_state = MenuState.Loading;
+
+        connect(ip, user);
+    }
+
+    VerticalLayout {
+        spacing: 16px;
+
+        Text {
+            horizontal-alignment: center;
+            text: "Connect";
+            font-size: 36px;
+            color: white;
+        }
+
+        VerticalLayout {
+            spacing: 8px;
+            alignment: start;
+
+            LineEdit {
+                placeholder-text: "Username";
+                text <=> user;
+
+                accepted(text) => { ipbox.focus() }
+            }
+
+            ipbox := LineEdit {
+                placeholder-text: "Server IP";
+                text <=> ip;
+
+                accepted(text) => { connect_local() }
+            }
+
+            Button {
+                text: "Connect";
+
+                clicked => { connect_local() };
+            }
+
+            Button {
+                text: "Back";
+
+                clicked => { menu_state = MenuState.Home };
+            }
+        }
+
+        Text {
+            horizontal-alignment: center;
+            text: "Made by iwantpizza";
+        }
+    }
+}

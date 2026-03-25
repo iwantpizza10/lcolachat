@@ -1,0 +1,39 @@
+import { MenuState } from "../types.slint";
+import { Button } from "std-widgets.slint";
+
+export component HomeView {
+    in-out property <MenuState> menu_state;
+
+    VerticalLayout {
+        spacing: 16px;
+
+        Text {
+            horizontal-alignment: center;
+            text: "Lcolachat!";
+            font-size: 36px;
+            color: white;
+        }
+
+        VerticalLayout {
+            spacing: 8px;
+            alignment: start;
+
+            Button {
+                text: "Connect";
+
+                clicked => { menu_state = MenuState.Connect };
+            }
+
+            Button {
+                text: "Host";
+
+                clicked => { menu_state = MenuState.Host };
+            }
+        }
+
+        Text {
+            horizontal-alignment: center;
+            text: "Made by iwantpizza";
+        }
+    }
+}
