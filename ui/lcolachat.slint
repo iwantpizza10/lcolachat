@@ -3,18 +3,19 @@ import { HomeView } from "./views/home.slint";
 import { ConnectView } from "views/connect.slint";
 import { HostView } from "views/host.slint";
 import { TextView } from "views/text.slint";
+import { ChatView } from "views/chat.slint";
 
 export component LcolachatWindow inherits Window {
     in-out property <MenuState> menu_state: MenuState.Home;
     in property <string> chat_name;
-    in property <[UIMessage]> name;
-    callback send-message(content: string);
+    in property <[UIMessage]> messages;
+    callback send_message(content: string);
     callback host(room: string, user: string);
     callback connect(ip: string, user: string);
 
     preferred-height: 512px;
     preferred-width: 512px;
-    background: #04080c;
+    background: #040810;
 
     states [
         title when menu_state == MenuState.Home: {
@@ -58,8 +59,10 @@ export component LcolachatWindow inherits Window {
         host(room, user) => { host(room, user) }
     }
 
-    if menu_state == MenuState.Messages: Text {
-        text: "plaaaacehooolddeerr";
+    if menu_state == MenuState.Messages: ChatView {
+        chat_name: chat_name;
+        messages: messages;
+        send_message(message) => { send_message(message) }
     }
 
     if menu_state == MenuState.Loading: TextView {
