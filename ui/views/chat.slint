@@ -32,7 +32,7 @@ export component ChatView {
                 property <UIMessage> message: messages[(messages.length - 12) + i];
 
                 Text {
-                    text: message.author.character-count != 0 && message.content.character-count != 0 ? "\{message.author}: \{message.content}" : "";
+                    text: message.content.character-count != 0 ? "\{message.author}: \{message.content}" : "";
                     font-size: 16px;
                 }
             }

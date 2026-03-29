@@ -29,7 +29,9 @@ async fn get_messages(State(state): State<Arc<ServerState>>) -> Json<Vec<Message
 async fn add_message(State(state): State<Arc<ServerState>>, Json(body): Json<Message>) -> Json<Vec<Message>> {
     let mut messages = state.messages.lock().await;
 
-    (*messages).push(body);
+    if body.content.trim().len() != 0 {
+        (*messages).push(body);
+    }
 
     Json((*messages).clone().to_vec())
 }
