@@ -1,13 +1,60 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::error::Error;
+mod server;
+
+use std::{cell::RefCell, error::Error, rc::Rc};
+use async_compat::Compat;
+use slint::SharedString;
 
 slint::include_modules!();
+
+struct ConfigStateThing {
+    roomname: SharedString,
+    username: SharedString,
+    ip: SharedString,
+    connected: bool
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
     let ui = LcolachatWindow::new()?;
 
-    // grahh
+    // let messages_vec_model: Rc<VecModel<UIMessage>> = Rc::from(VecModel::from(vec![]));
+    let config_state = Rc::from(RefCell::from(ConfigStateThing {
+        roomname: SharedString::new(),
+        username: SharedString::new(),
+        ip: SharedString::new(),
+        connected: false
+    }));
+
+    // let req_client = Rc::new(reqwest::ClientBuilder::new().build().unwrap());
+
+    ui.on_host({
+        let ui = ui.as_weak().unwrap();
+        let cs2 = Rc::clone(&config_state);
+
+        move |room, user| {
+            ui.set_menu_state(MenuState::Loading);
+
+            let mut cs2 = cs2.borrow_mut();
+
+            ui.set_chat_name(room.clone());
+
+            cs2.roomname = room.clone();
+            cs2.username = user;
+            cs2.ip = "localhost".into();
+            cs2.connected = true;
+
+            slint::spawn_local({
+                let ui = ui.as_weak();
+
+                Compat::new(async move {
+                    server::start_server(room.into(), ui.unwrap()).await;
+                })
+            }).unwrap();
+
+            ui.set_menu_state(MenuState::Messages);
+        }
+    });
 
     ui.run()?;
 

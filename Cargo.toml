@@ -4,7 +4,12 @@ version = "0.0.0"
 edition = "2024"
 
 [dependencies]
+async-compat = "0.2.5"
+axum = "0.8.8"
+reqwest = "0.13.2"
+serde = "1.0.228"
 slint = "1.14.1"
+tokio = "1.50.0"
 
 [build-dependencies]
 slint-build = "1.14.1"
