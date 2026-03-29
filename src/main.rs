@@ -2,9 +2,10 @@
 
 mod server;
 
-use std::{cell::RefCell, error::Error, rc::Rc};
+use std::{cell::RefCell, error::Error, rc::Rc, time::Duration};
 use async_compat::Compat;
 use slint::{ModelRc, SharedString, VecModel};
+use tokio::time;
 
 use crate::server::Message;
 
@@ -67,6 +68,36 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     });
 
+    ui.on_connect({
+        let ui = ui.as_weak().unwrap();
+        let cs2 = Rc::clone(&config_state);
+        let req_client = Rc::clone(&req_client);
+
+        move |ip, user| {
+            let ui = ui.as_weak().unwrap();
+            let cs2 = Rc::clone(&cs2);
+            let req_client = Rc::clone(&req_client);
+
+            cs2.borrow_mut().ip = ip.clone();
+            cs2.borrow_mut().username = user.clone();
+
+            slint::spawn_local(Compat::new(async move {
+                let res = req_client.get(format!("http://{ip}:3621/")).send().await;
+
+                if let Ok(res) = res && res.status().as_u16() == 200 {
+                    let chat_name = res.text().await.unwrap();
+
+                    cs2.borrow_mut().connected = true;
+
+                    ui.set_chat_name(chat_name.into());
+                    ui.set_menu_state(MenuState::Messages);
+                } else {
+                    ui.set_menu_state(MenuState::Error);
+                }
+            })).unwrap();
+        }
+    });
+
     ui.on_send_message({
         let messages_vec_model = Rc::clone(&messages_vec_model);
         let ui = ui.as_weak().unwrap();
@@ -99,7 +130,6 @@ fn main() -> Result<(), Box<dyn Error>> {
                         messages_vec_model.clear();
 
                         for message in messages {
-                            println!("h {}", message.content);
                             messages_vec_model.push(message.into());
                         }
 
@@ -113,6 +143,45 @@ fn main() -> Result<(), Box<dyn Error>> {
             })).unwrap();
         }
     });
+
+    slint::spawn_local(Compat::new({
+        let cs2 = Rc::clone(&config_state);
+        let mvm2 = Rc::clone(&messages_vec_model);
+        let req_client = Rc::clone(&req_client);
+        let ui = ui.as_weak().unwrap();
+
+        async move {
+            loop {
+                let mvm2 = Rc::clone(&mvm2);
+                time::sleep(Duration::from_millis(500)).await;
+
+                if !cs2.borrow().connected && ui.get_menu_state() != MenuState::Error {
+                    continue;
+                }
+
+                let ip = cs2.borrow().ip.clone();
+                let req = req_client.get(format!("http://{ip}:3621/messages")).send().await;
+                
+                if let Ok(req) = req {
+                    if req.status().as_u16() == 200 {
+                        let req_txt = req.text().await.unwrap();
+                        let messages: Vec<Message> = serde_json::from_str(&req_txt).unwrap();
+                        mvm2.clear();
+
+                        for message in messages {
+                            mvm2.push(message.into());
+                        }
+
+                        ui.set_messages(ModelRc::from(mvm2));
+                    } else {
+                        ui.set_menu_state(MenuState::Error);
+                    }
+                } else {
+                    ui.set_menu_state(MenuState::Error);
+                }
+            }
+        }
+    })).unwrap();
 
     ui.run()?;
 
