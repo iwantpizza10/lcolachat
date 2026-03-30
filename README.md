@@ -8,3 +8,4 @@ If you wish to connect to a chatroom another user (or app instance) is hosting, 
 If you would like to create a chatroom for others to connect to, select Host.
 
 From there, you can type in your username and either the IP to connect to or the chatroom name that others will see.
+If you do not know an IP address, you can find it in your OS's settings app or just use 'localhost' if you're connecting to your own computer.
