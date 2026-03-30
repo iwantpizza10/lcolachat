@@ -93,6 +93,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     ui.set_menu_state(MenuState::Messages);
                 } else {
                     ui.set_menu_state(MenuState::Error);
+                    cs2.borrow_mut().connected = false;
                 }
             })).unwrap();
         }
@@ -136,9 +137,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                         ui.set_messages(ModelRc::from(messages_vec_model));
                     } else {
                         ui.set_menu_state(MenuState::Error);
+                        config_state.borrow_mut().connected = false;
                     }
                 } else {
                     ui.set_menu_state(MenuState::Error);
+                    config_state.borrow_mut().connected = false;
                 }
             })).unwrap();
         }
@@ -175,9 +178,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                         ui.set_messages(ModelRc::from(mvm2));
                     } else {
                         ui.set_menu_state(MenuState::Error);
+                        cs2.borrow_mut().connected = false;
                     }
                 } else {
                     ui.set_menu_state(MenuState::Error);
+                    cs2.borrow_mut().connected = false;
                 }
             }
         }
